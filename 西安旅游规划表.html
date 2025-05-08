@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>西安四日游旅行规划表</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* 全局设置 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: #f9f9f9;
+            color: #333;
+            font-size: 10pt;
+            line-height: 1.4;
+        }
+        
+        /* A4尺寸设置 */
+        .a4-container {
+            width: 210mm;
+            height: 297mm;
+            margin: 0 auto;
+            background: white;
+            padding: 10mm;
+            position: relative;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        
+        /* 打印优化 */
+        @media print {
+            body {
+                background: white;
+                margin: 0;
+                padding: 0;
+            }
+            
+            .a4-container {
+                width: 210mm;
+                height: 297mm;
+                margin: 0;
+                padding: 10mm;
+                box-shadow: none;
+            }
+            
+            .no-print {
+                display: none !important;
+            }
+            
+            @page {
+                size: A4;
+                margin: 0;
+            }
+        }
+        
+        /* 裁剪线 */
+        .crop-marks::before,
+        .crop-marks::after {
+            content: "";
+            position: absolute;
+            border: 1px dashed #ccc;
+        }
+        
+        /* 标题区域 */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 10mm;
+            border-bottom: 2px solid #e77c3c;
+            padding-bottom: 5mm;
+        }
+        
+        .title-container {
+            flex: 1;
+        }
+        
+        .header h1 {
+            font-size: 24pt;
+            color: #c94c28;
+            margin-bottom: 4mm;
+            font-weight: 700;
+        }
+        
+        .header-info {
+            font-size: 10pt;
+            color: #555;
+        }
+        
+        .weather-summary {
+            background-color: #f6f6f6;
+            padding: 2mm 4mm;
+            border-radius: 3mm;
+            margin-top: 2mm;
+            display: inline-block;
+        }
+        
+        .city-icon {
+            width: 25mm;
+            height: 25mm;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="%23e77c3c" d="M280 132.5l-56-56c-3.8-3.8-10-3.8-13.8 0l-56 56c-3.8 3.8-3.8 10 0 13.8l56 56c3.8 3.8 10 3.8 13.8 0l56-56C283.8 142.5 283.8 136.3 280 132.5zM175 255.5l-56 56c-3.8 3.8-3.8 10 0 13.8l56 56c3.8 3.8 10 3.8 13.8 0l56-56c3.8-3.8 3.8-10 0-13.8l-56-56C184.9 251.7 178.8 251.7 175 255.5zM267 336.5l-56 56c-3.8 3.8-3.8 10 0 13.8l56 56c3.8 3.8 10 3.8 13.8 0l56-56c3.8-3.8 3.8-10 0-13.8l-56-56C276.9 332.7 270.8 332.7 267 336.5zM175 79.5l-56 56c-3.8 3.8-3.8 10 0 13.8l56 56c3.8 3.8 10 3.8 13.8 0l56-56c3.8-3.8 3.8-10 0-13.8l-56-56C184.9 75.7 178.8 75.7 175 79.5z"/></svg>');
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: contain;
+            opacity: 0.85;
+        }
+        
+        /* 行程概览区 */
+        .overview {
+            margin-bottom: 6mm;
+        }
+        
+        .overview h2 {
+            font-size: 14pt;
+            color: #414141;
+            margin-bottom: 3mm;
+            padding-left: 2mm;
+            border-left: 4mm solid #e77c3c;
+        }
+        
+        .overview-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 6mm;
+        }
+        
+        .overview-table th, .overview-table td {
+            border: 1px solid #ddd;
+            padding: 2mm 3mm;
+            text-align: left;
+        }
+        
+        .overview-table th {
+            background-color: #f2f2f2;
+            font-weight: 500;
+        }
+        
+        /* 详细时间表区 */
+        .daily-schedule {
+            margin-bottom: 6mm;
+        }
+        
+        .schedule-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 9pt;
+        }
+        
+        .schedule-table th, .schedule-table td {
+            border: 1px solid #ddd;
+            padding: 1.5mm 2mm;
+            text-align: left;
+        }
+        
+        .schedule-table th {
+            background-color: #f2f2f2;
+            font-weight: 500;
+        }
+        
+        .day-title {
+            background-color: #e77c3c20;
+            color: #c94c28;
+            font-weight: 500;
+            font-size: 11pt;
+            padding: 2mm 3mm;
+            margin: 3mm 0;
+            border-radius: 1mm;
+        }
+        
+        /* 交通信息区 */
+        .transportation {
+            margin-bottom: 6mm;
+        }
+        
+        .transportation ul {
+            padding-left: 6mm;
+            list-style-type: none;
+        }
+        
+        .transportation li {
+            position: relative;
+            margin-bottom: 2mm;
+        }
+        
+        .transportation li::before {
+            content: "\f238";
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            position: absolute;
+            left: -5mm;
+            color: #e77c3c;
+        }
+        
+        /* 住宿与餐饮区 */
+        .accommodation {
+            margin-bottom: 6mm;
+            display: flex;
+        }
+        
+        .hotels, .restaurants {
+            flex: 1;
+            padding: 0 2mm;
+        }
+        
+        .hotels h3, .restaurants h3 {
+            font-size: 11pt;
+            color: #414141;
+            margin-bottom: 2mm;
+            padding-bottom: 1mm;
+            border-bottom: 1px solid #e77c3c;
+        }
+        
+        .hotels ul, .restaurants ul {
+            padding-left: 5mm;
+            list-style-type: none;
+        }
+        
+        .hotels li, .restaurants li {
+            position: relative;
+            margin-bottom: 1.5mm;
+            font-size: 9pt;
+        }
+        
+        .hotels li::before {
+            content: "\f594";
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            position: absolute;
+            left: -4mm;
+            color: #e77c3c;
+        }
+        
+        .restaurants li::before {
+            content: "\f2e7";
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            position: absolute;
+            left: -4mm;
+            color: #e77c3c;
+        }
+        
+        /* 实用信息区 */
+        .useful-info {
+            display: flex;
+            margin-bottom: 6mm;
+        }
+        
+        .contacts, .tips {
+            flex: 1;
+            padding: 0 2mm;
+        }
+        
+        .contacts h3, .tips h3 {
+            font-size: 11pt;
+            color: #414141;
+            margin-bottom: 2mm;
+            padding-bottom: 1mm;
+            border-bottom: 1px solid #e77c3c;
+        }
+        
+        .contacts ul, .tips ul {
+            padding-left: 5mm;
+            list-style-type: none;
+        }
+        
+        .contacts li, .tips li {
+            position: relative;
+            margin-bottom: 1.5mm;
+            font-size: 9pt;
+        }
+        
+        .contacts li::before {
+            content: "\f095";
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            position: absolute;
+            left: -4mm;
+            color: #e77c3c;
+        }
+        
+        .tips li::before {
+            content: "\f0eb";
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            position: absolute;
+            left: -4mm;
+            color: #e77c3c;
+        }
+        
+        /* 预算区 */
+        .budget {
+            background-color: #f6f6f6;
+            padding: 2mm 4mm;
+            border-radius: 2mm;
+            margin-bottom: 6mm;
+        }
+        
+        .budget h3 {
+            font-size: 11pt;
+            color: #414141;
+            margin-bottom: 2mm;
+        }
+        
+        .budget ul {
+            columns: 2;
+            padding-left: 5mm;
+            list-style-type: none;
+        }
+        
+        .budget li {
+            position: relative;
+            margin-bottom: 1.5mm;
+            font-size: 9pt;
+            break-inside: avoid;
+        }
+        
+        .budget li::before {
+            content: "\f3d1";
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            position: absolute;
+            left: -4mm;
+            color: #e77c3c;
+        }
+        
+        /* 页脚 */
+        .footer {
+            text-align: center;
+            font-size: 8pt;
+            color: #888;
+            margin-top: 10mm;
+            padding-top: 2mm;
+            border-top: 1px solid #ddd;
+        }
+        
+        /* 打印按钮 */
+        .print-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #e77c3c;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Noto Sans SC', sans-serif;
+            font-size: 14px;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        .print-button:hover {
+            background-color: #c94c28;
+        }
+        
+        /* 图标样式 */
+        .icon {
+            margin-right: 1mm;
+            color: #e77c3c;
+        }
+        
+        /* 天气图标 */
+        .weather-icon {
+            margin-right: 1mm;
+        }
+        
+        /* 灰度兼容样式 */
+        @media print {
+            .icon, .weather-icon, .hotels li::before, .restaurants li::before, 
+            .contacts li::before, .tips li::before, .budget li::before, 
+            .transportation li::before {
+                color: #555 !important;
+            }
+            
+            .header h1, .day-title {
+                color: #333 !important;
+            }
+            
+            .header {
+                border-bottom: 2px solid #555 !important;
+            }
+            
+            .overview h2 {
+                border-left: 4mm solid #555 !important;
+            }
+            
+            .hotels h3, .restaurants h3, .contacts h3, .tips h3 {
+                border-bottom: 1px solid #555 !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="print-button no-print" onclick="window.print()"><i class="fas fa-print"></i> 打印行程表</button>
+    
+    <div class="a4-container crop-marks">
+        <!-- 行程标题区 -->
+        <div class="header">
+            <div class="title-container">
+                <h1><i class="fas fa-map-marked-alt icon"></i>西安四日游旅行规划表</h1>
+                <div class="header-info">
+                    <p><i class="fas fa-calendar-alt icon"></i><strong>日期：</strong>2025年5月8日-11日（4天3晚）</p>
+                    <div class="weather-summary">
+                        <p><i class="fas fa-cloud-sun icon"></i><strong>天气预报：</strong></p>
+                        <p><i class="fas fa-cloud-rain weather-icon"></i>5月8日：小雨转中雨，10-18°C，西南风1-3级</p>
+                        <p><i class="fas fa-cloud weather-icon"></i>5月9日：阴转小雨，11-22°C，西南风1-3级</p>
+                        <p><i class="fas fa-cloud-rain weather-icon"></i>5月10日：小雨转晴，5-18°C，北风1-3级</p>
+                        <p><i class="fas fa-sun weather-icon"></i>5月11日：晴转多云，7-23°C，西南风1-3级</p>
+                    </div>
+                </div>
+            </div>
+            <div class="city-icon"></div>
+        </div>
+        
+        <!-- 行程概览区 -->
+        <div class="overview">
+            <h2>行程概览</h2>
+            <table class="overview-table">
+                <thead>
+                    <tr>
+                        <th>日期</th>
+                        <th>主要行程</th>
+                        <th>住宿</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>第1天</td>
+                        <td><i class="fas fa-archway icon"></i>西安城墙 → <i class="fas fa-bell icon"></i>钟楼/鼓楼 → <i class="fas fa-utensils icon"></i>回民街 → <i class="fas fa-utensils icon"></i>永兴坊</td>
+                        <td>西安</td>
+                    </tr>
+                    <tr>
+                        <td>第2天</td>
+                        <td><i class="fas fa-horse icon"></i>秦始皇兵马俑 → <i class="fas fa-hot-tub icon"></i>华清宫 → <i class="fas fa-shopping-bag icon"></i>骡马市步行街</td>
+                        <td>西安</td>
+                    </tr>
+                    <tr>
+                        <td>第3天</td>
+                        <td><i class="fas fa-landmark icon"></i>大雁塔 → <i class="fas fa-museum icon"></i>陕西历史博物馆 → <i class="fas fa-tree icon"></i>大唐芙蓉园</td>
+                        <td>西安</td>
+                    </tr>
+                    <tr>
+                        <td>第4天</td>
+                        <td><i class="fas fa-monument icon"></i>西安碑林博物馆 → <i class="fas fa-university icon"></i>西安博物院 → <i class="fas fa-utensils icon"></i>西安小吃街</td>
+                        <td>-</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- 详细时间表区 -->
+        <div class="daily-schedule">
+            <h2>详细时间表</h2>
+            
+            <div class="day-title">
+                <i class="fas fa-calendar-day icon"></i>第1天（5月8日 周四）：古城中心游
+            </div>
+            <table class="schedule-table">
+                <thead>
+                    <tr>
+                        <th>时间</th>
+                        <th>景点/活动</th>
+                        <th>地点</th>
+                        <th>详情</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>09:00-11:30</td>
+                        <td><i class="fas fa-archway icon"></i>西安城墙</td>
+                        <td>南大街2号</td>
+                        <td>门票：54元，骑行城墙一周，体验古城风貌</td>
+                    </tr>
+                    <tr>
+                        <td>11:30-13:00</td>
+                        <td><i class="fas fa-bell icon"></i>钟楼/鼓楼</td>
+                        <td>钟楼站C出口正对面</td>
+                        <td>古城中心地标，拍照留念</td>
+                    </tr>
+                    <tr>
+                        <td>13:00-14:30</td>
+                        <td><i class="fas fa-utensils icon"></i>回民街午餐</td>
+                        <td>钟楼附近</td>
+                        <td>品尝牛羊肉泡馍、肉夹馍、biangbiang面</td>
+                    </tr>
+                    <tr>
+                        <td>15:00-18:30</td>
+                        <td><i class="fas fa-utensils icon"></i>永兴坊</td>
+                        <td>东乐巷15号</td>
+                        <td>品尝各种陕西特色小吃，体验西安美食文化</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div class="day-title">
+                <i class="fas fa-calendar-day icon"></i>第2天（5月9日 周五）：秦文化探索
+            </div>
+            <table class="schedule-table">
+                <thead>
+                    <tr>
+                        <th>时间</th>
+                        <th>景点/活动</th>
+                        <th>地点</th>
+                        <th>详情</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>08:30-12:30</td>
+                        <td><i class="fas fa-horse icon"></i>秦始皇兵马俑</td>
+                        <td>秦陵北路</td>
+                        <td>评分：4.7分，世界八大奇迹之一</td>
+                    </tr>
+                    <tr>
+                        <td>13:30-16:30</td>
+                        <td><i class="fas fa-hot-tub icon"></i>华清宫</td>
+                        <td>华清路38号</td>
+                        <td>门票：120元，唐玄宗与杨贵妃的爱情故事</td>
+                    </tr>
+                    <tr>
+                        <td>17:30-20:00</td>
+                        <td><i class="fas fa-shopping-bag icon"></i>骡马市步行街</td>
+                        <td>东大街骡马市1号</td>
+                        <td>购物与美食集中地，晚餐自选</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div class="day-title">
+                <i class="fas fa-calendar-day icon"></i>第3天（5月10日 周六）：唐文化体验
+            </div>
+            <table class="schedule-table">
+                <thead>
+                    <tr>
+                        <th>时间</th>
+                        <th>景点/活动</th>
+                        <th>地点</th>
+                        <th>详情</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>09:00-11:30</td>
+                        <td><i class="fas fa-landmark icon"></i>大雁塔</td>
+                        <td>慈恩路1号</td>
+                        <td>门票：30元，唐代佛教文化地标</td>
+                    </tr>
+                    <tr>
+                        <td>12:00-15:30</td>
+                        <td><i class="fas fa-museum icon"></i>陕西历史博物馆</td>
+                        <td>小寨东路91号</td>
+                        <td>门票：118元，陕西历史文化精华展示</td>
+                    </tr>
+                    <tr>
+                        <td>16:00-20:00</td>
+                        <td><i class="fas fa-tree icon"></i>大唐芙蓉园</td>
+                        <td>芙蓉西路99号</td>
+                        <td>晚上有灯光秀，唐代园林建筑</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div class="day-title">
+                <i class="fas fa-calendar-day icon"></i>第4天（5月11日 周日）：休闲文化体验
+            </div>
+            <table class="schedule-table">
+                <thead>
+                    <tr>
+                        <th>时间</th>
+                        <th>景点/活动</th>
+                        <th>地点</th>
+                        <th>详情</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>09:00-11:00</td>
+                        <td><i class="fas fa-monument icon"></i>西安碑林博物馆</td>
+                        <td>三学街15号</td>
+                        <td>中国古代书法艺术宝库</td>
+                    </tr>
+                    <tr>
+                        <td>11:30-13:30</td>
+                        <td><i class="fas fa-university icon"></i>西安博物院</td>
+                        <td>朱雀大街37号</td>
+                        <td>了解西安古今发展变化，午餐</td>
+                    </tr>
+                    <tr>
+                        <td>14:00-17:00</td>
+                        <td><i class="fas fa-utensils icon"></i>西安小吃街</td>
+                        <td>双拥路与三桥新街交叉口</td>
+                        <td>品尝更多西安特色美食，购买伴手礼</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- 交通信息区 -->
+        <div class="transportation">
+            <h2>交通信息</h2>
+            <ul>
+                <li><strong>机场到市区：</strong>西安咸阳国际机场→市区，乘坐机场大巴或地铁14号线</li>
+                <li><strong>地铁2号线：</strong>钟楼站→永兴坊（2站）</li>
+                <li><strong>地铁1号线：</strong>西安火车站→大雁塔（7站）</li>
+                <li><strong>旅游专线5路：</strong>大雁塔→大唐芙蓉园（3站）</li>
+                <li><strong>游5路公交：</strong>秦始皇兵马俑→华清宫（约30分钟）</li>
+            </ul>
+        </div>
+        
+        <!-- 住宿与餐饮区 -->
+        <div class="accommodation">
+            <div class="hotels">
+                <h3>推荐酒店</h3>
+                <ul>
+                    <li><strong>高端：</strong>西安W酒店（曲江池东路333号）</li>
+                    <li><strong>高端：</strong>丽思卡尔顿酒店（科技二路50号）</li>
+                    <li><strong>中端：</strong>西安建国饭店（互助路2号）</li>
+                    <li><strong>中端：</strong>天朗时代大酒店（环城西路北段360号）</li>
+                    <li><strong>特色：</strong>西安东舍酒店（粉巷中段南院门10号）</li>
+                </ul>
+            </div>
+            
+            <div class="restaurants">
+                <h3>特色餐厅推荐</h3>
+                <ul>
+                    <li><strong>回民街：</strong>老孙家泡馍馆、同盛祥牛羊肉泡馍</li>
+                    <li><strong>永兴坊：</strong>袁记肉夹馍、德发长饺子馆</li>
+                    <li><strong>骡马市：</strong>水井坊凉皮、秦豫肉丸胡辣汤</li>
+                    <li><strong>小吃：</strong>贾三灌汤包子、海记锅盔、李记腊汁肉夹馍</li>
+                    <li><strong>甜点：</strong>沙里香冰枣糕、八仙庵蜂蜜凉粽、北院门醪糟</li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- 实用信息区 -->
+        <div class="useful-info">
+            <div class="contacts">
+                <h3>重要电话</h3>
+                <ul>
+                    <li><strong>旅游咨询：</strong>029-87617065</li>
+                    <li><strong>紧急求助：</strong>110（警察）/120（急救）</li>
+                    <li><strong>兵马俑博物馆：</strong>029-81399001</li>
+                    <li><strong>陕西历史博物馆：</strong>029-85253806</li>
+                    <li><strong>出租车投诉：</strong>029-82293456</li>
+                </ul>
+            </div>
+            
+            <div class="tips">
+                <h3>旅行小贴士</h3>
+                <ul>
+                    <li>前两天有雨，携带雨具或购买一次性雨衣</li>
+                    <li>准备舒适的鞋子，景点游览需大量步行</li>
+                    <li>景点门票可提前网上预约，避免排队</li>
+                    <li>秦始皇兵马俑和陕西历史博物馆需预留足够时间参观</li>
+                    <li>西安空气干燥，注意补充水分</li>
+                    <li>避开周末和节假日高峰期参观热门景点</li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- 预算区 -->
+        <div class="budget">
+            <h3><i class="fas fa-coins icon"></i>费用预算</h3>
+            <ul>
+                <li><strong>景点门票：</strong>约350元/人</li>
+                <li><strong>住宿费用：</strong>约800-1500元/晚</li>
+                <li><strong>餐饮费用：</strong>约150-300元/人/天</li>
+                <li><strong>市内交通：</strong>约50元/人/天</li>
+                <li><strong>购物伴手礼：</strong>视个人需求</li>
+                <li><strong>总预算：</strong>约3500-6000元/人</li>
+            </ul>
+        </div>
+        
+        <!-- 页脚 -->
+        <div class="footer">
+            <p>© 2025 西安旅游规划表 | 打印日期：<span id="print-date"></span></p>
+        </div>
+    </div>
+    
+    <script>
+        // 设置打印日期
+        document.getElementById('print-date').textContent = new Date().toLocaleDateString('zh-CN');
+        
+        // 打印功能
+        function printItinerary() {
+            window.print();
+        }
+    </script>
+</body>
+</html> 
